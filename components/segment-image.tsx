@@ -327,6 +327,7 @@ export default function SegmentImage({
                         image,
                         new ParameterSet(edgeIndicatorStringToEnum(edgeIndicator), iter_inner, iter_outer, alpha, lambda, sigma)
                       );
+                      jPolygon.clear_canvas();
                     }}
                   >
                     Start

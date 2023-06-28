@@ -10,6 +10,7 @@ export default function ViewDistribution({addImageVisible, setAddImageVisible}: 
   const [loading, setLoading] = useState<boolean>(false);
   const [finished, setFinished] = useState<boolean>(false);
   const [parameterSet, setParameterSet] = useState<ParameterSet | undefined>(undefined);
+  const [iteration, setIteration] = useState<number>(0);
 
   return (
     <>
@@ -57,11 +58,30 @@ export default function ViewDistribution({addImageVisible, setAddImageVisible}: 
               <>
               <div className="row flex justify-center">
                 <img className="w-auto max-h-lg rounded-lg col-6" src={images[images.length - 1]} alt="image description" />
-                <img className="w-auto max-h-lg rounded-lg col-6" src={images[images.length - 1]} alt="image description" />
+                {/* <img className="w-auto max-h-lg rounded-lg col-6" src={images[images.length - 1]} alt="image description" /> */}
               </div>
-              <div className="w-full rounded-full h-2.5 bg-gray-700">
+              {/* <div className="w-full rounded-full h-2.5 bg-gray-700">
                 <div className="bg-blue-600 h-2.5 rounded-full w-100"></div>
-              </div>
+              </div> */} 
+              <p className="text-center text-white">{parameterSet ? Math.min(100, Math.ceil(iteration / parameterSet?.outer_iterations * 100))  + "%" : ""}</p>
+              <p id="iteration" className="hidden">{images.length}</p>
+
+              {parameterSet?.outer_iterations && iteration < parameterSet?.outer_iterations ?
+
+                <div className="flex items-center justify-center w-56  rounded-lg dark:bg-gray-800">
+                <div className="px-3 py-1 text-xs font-medium leading-none text-center rounded-full animate-pulse bg-blue-900 text-blue-200">running...</div>
+                </div>
+               : 
+                
+                  parameterSet?.outer_iterations ?
+                  <div className="flex items-center justify-center w-56  rounded-lg dark:bg-gray-800">
+                  <div className="px-3 py-1 text-xs font-medium leading-none text-center rounded-full bg-green-900 text-green-200">Done</div>
+                  </div>
+                  :
+                  null
+              }
+
+
               </>
               : 
               null
@@ -91,6 +111,7 @@ export default function ViewDistribution({addImageVisible, setAddImageVisible}: 
     const formData = new FormData();
     formData.append('file', image);
     formData.append('parameters', JSON.stringify(parameterSet));
+    setParameterSet(parameterSet);
 
     const coordinatesJSON: {x: number, y: number}[] = JSON.parse(coordinates);
     const contour = [Math.round(coordinatesJSON[0].y), Math.round(coordinatesJSON[2].y), Math.round(coordinatesJSON[0].x), Math.round(coordinatesJSON[2].x)];
@@ -143,10 +164,24 @@ export default function ViewDistribution({addImageVisible, setAddImageVisible}: 
       const newImages = images.slice();
       newImages.push(url);
       setImages(newImages);
+      updateParagraph();
     });
 
     return () => {
       socket.close(); // Close the WebSocket connection on component unmount
     };
   }
+
+  function updateParagraph() {
+    const paragraph = document.getElementById('iteration');
+    if (paragraph) {
+      const text = paragraph.innerText;
+      const number = parseInt(text, 10);
+      const incrementedNumber = number + 1;
+      paragraph.innerText = incrementedNumber.toString();
+      setIteration(incrementedNumber);
+    }
+  }
 }
+
+
